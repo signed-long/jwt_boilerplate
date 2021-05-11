@@ -3,7 +3,9 @@ Boilerplate code for a flask API using a JWT-based authorization scheme.
 
 ### To run:
 First make git ignore changes to your development .env files by running:
-```git update-index --skip-worktree .env && git update-index --skip-worktree .env.db```
+```
+git update-index --skip-worktree .env && git update-index --skip-worktree .env.db
+```
 
 Update the following files for a development environment:
 - .env
