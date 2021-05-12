@@ -15,3 +15,4 @@ six==1.16.0
 SQLAlchemy==1.4.14
 Werkzeug==1.0.1
 PyJWT==2.1.0
+Flask-Bcrypt==0.7.1

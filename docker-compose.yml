@@ -4,7 +4,7 @@ services:
     build: ./web
     command: flask run -h 0.0.0.0
     volumes:
-      - ./jwt_auth/:/usr/src/app/
+      - ./web/:/usr/src/app/
     ports:
       - 5000:5000
     env_file:
