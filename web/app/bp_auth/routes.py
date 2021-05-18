@@ -1,10 +1,16 @@
 from flask import Blueprint, request
-from app.utils.decorators import creds_required
-from app.utils.helpers import make_json_response
 from app import bcrypt
 from app.models import User
-import jwt
-import os
+from app.utils.helpers import (
+    make_json_response,
+    create_access_token,
+    create_refresh_token
+)
+from app.utils.decorators import (
+    creds_required,
+    access_token_required,
+    refresh_token_required
+)
 
 
 bp_auth = Blueprint("bp_auth", __name__)
@@ -22,6 +28,7 @@ bp_auth = Blueprint("bp_auth", __name__)
 
 
 @bp_auth.route("/test", methods=["GET"])
+@access_token_required
 def test():
     '''
 
@@ -50,13 +57,13 @@ def login():
     # authenticate user and return access token
     if user and bcrypt.check_password_hash(user.password_hash,
                                            request_data["password"]):
-        access_token = jwt.encode({"sub": user.id},
-                                  os.environ.get("ACCESS_TOKEN_SECRET"),
-                                  algorithm="HS256")
-        msg = "OK 200: Authentication succesfull."
+        access_token = create_access_token(user)
+        refresh_token = create_refresh_token(user)
+        tokens = {"access_token": access_token, "refresh_token": refresh_token}
+        msg = "OK 200: Authentication successful"
         return make_json_response(status=200,
                                   msg=msg,
-                                  response_dict={"access_token": access_token})
+                                  response_dict=tokens)
 
     # user does not exist or entered bad credentials
     msg = "ERROR 401: Authentication failed."
@@ -65,6 +72,15 @@ def login():
 
 @bp_auth.route("/logout", methods=["POST"])
 def logout():
+    '''
+
+    '''
+    pass
+
+
+@bp_auth.route("/refresh", methods=["POST"])
+@refresh_token_required
+def refresh():
     '''
 
     '''
