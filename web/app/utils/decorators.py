@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import make_response, request, jsonify
+from flask import request
 from app.utils.helpers import make_json_response
 
 
@@ -10,11 +10,6 @@ def creds_required(f):
         if request_data.get("email") and request_data.get("password"):
             return f(*args, **kwargs)
         else:
-            response_dict = {
-                "http_response": {
-                    "message": "Must include 'email' and 'password' fields.",
-                    "status": 400
-                }
-            }
-            return make_json_response(response_dict)
+            msg = "ERROR 400: Must include 'email' and 'password' fields."
+            return make_json_response(status=400, msg=msg)
     return decorated_function
