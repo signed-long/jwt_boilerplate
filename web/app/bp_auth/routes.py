@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from app import bcrypt
+from app import bcrypt, db
 from app.models import User
 from app.utils.helpers import (
     make_json_response,
@@ -33,15 +33,25 @@ def test():
     '''
 
     '''
-    return "You are authorized"
+    return kwargs["current_user"].email
 
 
 @bp_auth.route("/register", methods=["POST"])
+@creds_required
 def register():
     '''
 
     '''
-    pass
+    request_data = request.get_json()
+    email = request_data["email"]
+    pw_hash = bcrypt.generate_password_hash(request_data["password"])
+
+    new_user = User(email=email, password_hash=pw_hash.decode("utf-8"))
+    db.session.add(new_user)
+    db.session.commit()
+
+    msg = "OK 200: Registration successful"
+    return make_json_response(status=200, msg=msg)
 
 
 @bp_auth.route("/login", methods=["POST"])
@@ -57,13 +67,12 @@ def login():
     # authenticate user and return access token
     if user and bcrypt.check_password_hash(user.password_hash,
                                            request_data["password"]):
+
         access_token = create_access_token(user)
         refresh_token = create_refresh_token(user)
         tokens = {"access_token": access_token, "refresh_token": refresh_token}
         msg = "OK 200: Authentication successful"
-        return make_json_response(status=200,
-                                  msg=msg,
-                                  response_dict=tokens)
+        return make_json_response(status=200, msg=msg, response_dict=tokens)
 
     # user does not exist or entered bad credentials
     msg = "ERROR 401: Authentication failed."

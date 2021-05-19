@@ -2,15 +2,19 @@ from functools import wraps
 from flask import request
 from app.utils.helpers import make_json_response, decode_jwt_token
 from app.models import User
+from os import environ
 
 
 def creds_required(f):
     '''
-
+    Requires a request to include a user's credentials in the request body
+    before carrying out the logic of the route.
     '''
     @wraps(f)
     def decorated_function(*args, **kwargs):
         request_data = request.get_json()
+
+        # enforce
         if request_data.get("email") and request_data.get("password"):
             return f(*args, **kwargs)
         else:
@@ -21,23 +25,31 @@ def creds_required(f):
 
 def access_token_required(f):
     '''
-
+    Requires a request to include a valid access token in the request body
+    before carrying out the logic of the route.
     '''
     @wraps(f)
     def decorated_function(*args, **kwargs):
+
+        # get access_token from request body
         request_data = request.get_json()
         access_token = request_data.get("access_token")
 
+        # enforce access_token was sent from client
         if access_token:
             try:
-                user_id = decode_jwt_token(access_token)
+                user_id = decode_jwt_token(access_token,
+                                           environ.get("ACCESS_TOKEN_SECRET"))
                 current_user = User.query.filter_by(id=user_id).first()
 
                 if current_user:
-                    return f(current_user, *args, **kwargs)
+                    kwargs["current_user": current_user]
+                    return f(*args, **kwargs)
 
                 raise Exception
 
+            # enforce access_token was valid, expired or malfourmend tokens
+            # will cause exceptions to be trhown from decode_jwt_token
             except Exception:
                 msg = "ERROR 401: Invalid access token."
                 return make_json_response(status=401, msg=msg)
@@ -51,23 +63,31 @@ def access_token_required(f):
 
 def refresh_token_required(f):
     '''
-
+    Requires a request to include a valid refresh token in the request body
+    before carrying out the logic of the route.
     '''
     @wraps(f)
     def decorated_function(*args, **kwargs):
+
+        # get refresh_token from request body
         request_data = request.get_json()
         refresh_token = request_data.get("refresh_token")
 
+        # enforce refresh_token was sent from client
         if refresh_token:
             try:
-                user_id = decode_jwt_token(refresh_token, type="refresh")
+                user_id = decode_jwt_token(refresh_token,
+                                           environ.get("REFRESH_TOKEN_SECRET"))
                 current_user = User.query.filter_by(id=user_id).first()
 
                 if current_user.refresh_token:
-                    return f(current_user, *args, **kwargs)
+                    kwargs["current_user": current_user]
+                    return f(*args, **kwargs)
 
                 raise Exception
 
+            # enforce refresh_token was valid, expired or malfourmend tokens
+            # will cause exceptions to be trhown from decode_jwt_token
             except Exception:
                 msg = "ERROR 401: Invalid refresh token."
                 return make_json_response(status=401, msg=msg)

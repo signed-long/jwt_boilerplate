@@ -1,14 +1,19 @@
 from flask import make_response, jsonify
 import jwt
-import os
+from os import environ
 from datetime import datetime, timedelta, timezone
 
 
 def make_json_response(status, msg, response_dict={}):
     '''
-    Returns a json response given a response_dict. API style is also enforced.
+    Returns a JSON response given a response_dict. Required fields are passed as
+    arguments, any other data is passed in as 'response_dict'.
 
-    Parameter: response_dict (dict) - a dictionary to make a json response from.
+    Parameters:
+        - status (int) - Status code of the response.
+        - msg (str) - Additional information for client.
+        - response_dict (dict) - A dictionary that will be returned in the
+          'data' field of the response.
     '''
     response = {
         "http_response": {
@@ -25,33 +30,40 @@ def make_json_response(status, msg, response_dict={}):
 
 def create_access_token(user):
     '''
+    Creates a access token.
 
+    Parameter: user (User) - A user to create the token for.
     '''
-    token_life = int(os.environ.get("TOKEN_EXPIRATION_TIME"))
+    token_life = int(environ.get("ACCESS_TOKEN_EXP_MINS"))
     payload = {"sub": user.id,
-               "exp": datetime.now(timezone.utc) + timedelta(seconds=token_life)}
+               "exp": datetime.now(timezone.utc) + timedelta(minutes=token_life)}
 
-    return jwt.encode(payload, os.environ.get("ACCESS_TOKEN_SECRET"),
+    return jwt.encode(payload, environ.get("ACCESS_TOKEN_SECRET"),
                       algorithm="HS256")
 
 
 def create_refresh_token(user):
     '''
+    Creates a refresh token.
 
+    Parameter: user (User) - A user to create the token for.
     '''
-    payload = {"sub": user.id}
+    token_life = int(environ.get("REFRESH_TOKEN_EXP_DAYS"))
+    payload = {"sub": user.id,
+               "exp": datetime.now(timezone.utc) + timedelta(minutes=token_life)}
 
-    return jwt.encode(payload, os.environ.get("REFRESH_TOKEN_SECRET"),
+    return jwt.encode(payload, environ.get("REFRESH_TOKEN_SECRET"),
                       algorithm="HS256")
 
 
-def decode_jwt_token(token, type="access"):
+def decode_jwt_token(token, key):
+    '''
+    Decodes a JWT token.
+
+    Parameters:
+        - token (str) - The JWT token.
+        - key (str) - The key used to create the token.
     '''
 
-    '''
-    if type == "access":
-        payload = jwt.decode(token, os.environ.get("ACCESS_TOKEN_SECRET"))
-    elif type == "refresh":
-        payload = jwt.decode(token, os.environ.get("REFRESH_TOKEN_SECRET"))
-
+    payload = jwt.decode(token, key)
     return payload["sub"]
