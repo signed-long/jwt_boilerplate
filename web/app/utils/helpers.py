@@ -65,5 +65,5 @@ def decode_jwt_token(token, key):
         - key (str) - The key used to create the token.
     '''
 
-    payload = jwt.decode(token, key)
+    payload = jwt.decode(token, key, algorithms="HS256")
     return payload["sub"]

@@ -29,18 +29,18 @@ bp_auth = Blueprint("bp_auth", __name__)
 
 @bp_auth.route("/test", methods=["GET"])
 @access_token_required
-def test():
+def test(current_user):
     '''
-
+    Test route to test and authorization required endpoint.
     '''
-    return kwargs["current_user"].email
+    return current_user.email
 
 
 @bp_auth.route("/register", methods=["POST"])
 @creds_required
 def register():
     '''
-
+    Creates a new user in the db.
     '''
     request_data = request.get_json()
     email = request_data["email"]
@@ -58,7 +58,7 @@ def register():
 @creds_required
 def login():
     '''
-
+    Authenticates a client and responds with access and refresh tokens.
     '''
     # pull user from db
     request_data = request.get_json()
@@ -89,7 +89,7 @@ def logout():
 
 @bp_auth.route("/refresh", methods=["POST"])
 @refresh_token_required
-def refresh():
+def refresh(current_user):
     '''
 
     '''
