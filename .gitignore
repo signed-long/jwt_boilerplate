@@ -1,6 +1,5 @@
 # Environment variables
-.env
-.env.db
+.env*
 
 
 # Byte-compiled / optimized / DLL files
