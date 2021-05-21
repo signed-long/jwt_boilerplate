@@ -79,11 +79,11 @@ class FlaskJwtAuthTest(unittest.TestCase):
 
         body = {"email": "NoUser@test.ca", "password": "pass"}
         login_res = login_user(self.client, body)
-        self.assertEqual(login_res.status_code, 403)
+        self.assertEqual(login_res.status_code, 401)
 
         body = {"email": "testUser@test.ca", "password": "wrong_pass"}
         login_res = login_user(self.client, body)
-        self.assertEqual(login_res.status_code, 403)
+        self.assertEqual(login_res.status_code, 401)
 
         body = {"email": "testUser@test.ca"}
         login_res = login_user(self.client, body)

@@ -1,10 +1,10 @@
 from flask import Blueprint, request
+from os import environ
 from app import bcrypt, db
 from app.models import User
 from app.utils.helpers import (
     make_json_response,
-    create_access_token,
-    create_refresh_token
+    create_jwt_for_user
 )
 from app.utils.decorators import (
     creds_required,
@@ -68,15 +68,22 @@ def login():
     if user and bcrypt.check_password_hash(user.password_hash,
                                            request_data["password"]):
 
-        access_token = create_access_token(user)
-        refresh_token = create_refresh_token(user)
+        exp = int(environ.get("ACCESS_TOKEN_EXP_SEC"))
+        access_token = create_jwt_for_user(user,
+                                           environ.get("ACCESS_TOKEN_SECRET"),
+                                           sec=exp)
+        exp = int(environ.get("REFRESH_TOKEN_EXP_DAYS"))
+        refresh_token = create_jwt_for_user(user,
+                                            environ.get("REFRESH_TOKEN_SECRET"),
+                                            days=exp)
         tokens = {"access_token": access_token, "refresh_token": refresh_token}
+
         msg = "OK 200: Authentication successful"
         return make_json_response(status=200, msg=msg, response_dict=tokens)
 
     # user does not exist or entered bad credentials
-    msg = "ERROR 403: Authentication failed."
-    return make_json_response(status=403, msg=msg)
+    msg = "ERROR 401: Authentication failed."
+    return make_json_response(status=401, msg=msg)
 
 
 @bp_auth.route("/logout", methods=["POST"])

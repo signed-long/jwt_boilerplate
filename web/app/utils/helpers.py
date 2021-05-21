@@ -28,35 +28,26 @@ def make_json_response(status, msg, response_dict={}):
     return make_response(jsonify(response), status_code)
 
 
-def create_access_token(user):
+def create_jwt_for_user(user, key, sec=None, days=None):
     '''
     Creates a access token.
 
     Parameter: user (User) - A user to create the token for.
     '''
-    token_life = int(environ.get("ACCESS_TOKEN_EXP_SEC"))
-    payload = {"sub": user.id,
-               "exp": datetime.now(timezone.utc) + timedelta(seconds=token_life)}
+    if sec:
+        payload = {"sub": user.id,
+                   "exp": datetime.now(timezone.utc) + timedelta(seconds=sec)}
+    elif days:
+        payload = {"sub": user.id,
+                   "exp": datetime.now(timezone.utc) + timedelta(seconds=sec)}
+    else:
+        msg = "Expiration time must be passed as 'sec' or 'days' argument"
+        raise Exception(msg)
 
-    return jwt.encode(payload, environ.get("ACCESS_TOKEN_SECRET"),
-                      algorithm="HS256")
-
-
-def create_refresh_token(user):
-    '''
-    Creates a refresh token.
-
-    Parameter: user (User) - A user to create the token for.
-    '''
-    token_life = int(environ.get("REFRESH_TOKEN_EXP_DAYS"))
-    payload = {"sub": user.id,
-               "exp": datetime.now(timezone.utc) + timedelta(minutes=token_life)}
-
-    return jwt.encode(payload, environ.get("REFRESH_TOKEN_SECRET"),
-                      algorithm="HS256")
+    return jwt.encode(payload, key, algorithm="HS256")
 
 
-def decode_jwt_token(token, key):
+def get_id_from_jwt(token, key):
     '''
     Decodes a JWT token.
 
