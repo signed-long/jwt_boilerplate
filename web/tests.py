@@ -4,6 +4,7 @@ import json
 from app.models import User
 from app.utils.helpers import decode_jwt_token
 from os import environ
+import time
 
 
 class FlaskJwtAuthTest(unittest.TestCase):
@@ -96,16 +97,27 @@ class FlaskJwtAuthTest(unittest.TestCase):
         login_res = login_user(self.client, body)
         self.assertEqual(login_res.status_code, 400)
 
-    # def test_get(self):
-    #     '''
-    #     '''
-    #     body = {}
-    #     headers = {"Authorization": "Bearer " + str(self.auth_header)}
-    #     res = self.client().get('/test',
-    #                             data=json.dumps(body),
-    #                             headers=json.dumps(headers),
-    #                             content_type='application/json')
-    #     self.assertEqual(res.status_code, 200)
+    def test_get(self):
+        '''
+        '''
+        body = {"email": "testUser@test.ca", "password": "pass"}
+        register_res = register_user(self.client, body)
+        self.assertEqual(register_res.status_code, 200)
+
+        login_res = login_user(self.client, body)
+        data = json.loads(login_res.data.decode())
+        self.assertEqual(login_res.status_code, 200)
+
+        data = json.loads(login_res.data.decode())
+        access_token = data["data"]["access_token"]
+
+        headers = {"Authorization": "Bearer " + str(access_token)}
+        res = self.client().get('/test', headers=headers)
+        self.assertEqual(res.status_code, 200)
+
+        time.sleep(16)
+        res = self.client().get('/test', headers=headers)
+        self.assertEqual(res.status_code, 401)
 
 
 def register_user(client, body):
