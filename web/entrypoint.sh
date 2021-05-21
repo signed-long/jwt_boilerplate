@@ -12,13 +12,8 @@ then
 fi
 
 
-if [ "$FLASK_ENV" = "testing" ]
+if [ "$FLASK_ENV" = "development" ]
 then
-    echo "Creating the database tables w/ dummy data..."
-    python manage.py load_dummy_db
-    echo "Tables created"
-
-else
     echo "Creating the database tables..."
     python manage.py create_db
     echo "Tables created"
