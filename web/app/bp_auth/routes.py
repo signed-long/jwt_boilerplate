@@ -75,8 +75,8 @@ def login():
         return make_json_response(status=200, msg=msg, response_dict=tokens)
 
     # user does not exist or entered bad credentials
-    msg = "ERROR 401: Authentication failed."
-    return make_json_response(status=401, msg=msg)
+    msg = "ERROR 403: Authentication failed."
+    return make_json_response(status=403, msg=msg)
 
 
 @bp_auth.route("/logout", methods=["POST"])

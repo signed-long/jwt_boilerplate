@@ -15,7 +15,7 @@ def creds_required(f):
         request_data = request.get_json()
 
         # enforce
-        if request_data.get("email") and request_data.get("password"):
+        if request_data and request_data.get("email") and request_data.get("password"):
             return f(*args, **kwargs)
         else:
             msg = ("ERROR 400: Must include 'email' and 'password' ",
