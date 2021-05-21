@@ -34,9 +34,9 @@ def create_access_token(user):
 
     Parameter: user (User) - A user to create the token for.
     '''
-    token_life = int(environ.get("ACCESS_TOKEN_EXP_MINS"))
+    token_life = int(environ.get("ACCESS_TOKEN_EXP_SEC"))
     payload = {"sub": user.id,
-               "exp": datetime.now(timezone.utc) + timedelta(minutes=token_life)}
+               "exp": datetime.now(timezone.utc) + timedelta(seconds=token_life)}
 
     return jwt.encode(payload, environ.get("ACCESS_TOKEN_SECRET"),
                       algorithm="HS256")
