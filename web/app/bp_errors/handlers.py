@@ -13,6 +13,15 @@ def error_404(error):
     return make_json_response(status=404, msg=msg)
 
 
+@bp_errors.app_errorhandler(405)
+def error_405(error):
+    """
+    Handels 405 error Method not allowed.
+    """
+    msg = ("ERROR 405: Method not allowed.")
+    return make_json_response(status=405, msg=msg)
+
+
 @bp_errors.app_errorhandler(500)
 def error_500(error):
     """
