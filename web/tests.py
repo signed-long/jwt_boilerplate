@@ -8,11 +8,9 @@ import time
 
 
 class FlaskJwtAuthTest(unittest.TestCase):
-    '''
-    '''
-
     def setUp(self):
         '''
+        Runs before every method.
         '''
         self.app = create_app()
         self.client = self.app.test_client
@@ -24,6 +22,7 @@ class FlaskJwtAuthTest(unittest.TestCase):
 
     def tearDown(self):
         '''
+        Runs after every method.
         '''
         with self.app.app_context():
             db.session.remove()
@@ -31,11 +30,14 @@ class FlaskJwtAuthTest(unittest.TestCase):
 
     def test_register(self):
         '''
+        Tests the registration route.
         '''
+        # resister test user
         body = {"email": "testUser@test.ca", "password": "pass"}
         res = register_user(self.client, body)
         self.assertEqual(res.status_code, 201)
 
+        # test invalid requests
         body = {"email": "testUser@test.ca"}
         res = register_user(self.client, body)
         self.assertEqual(res.status_code, 400)
@@ -54,12 +56,12 @@ class FlaskJwtAuthTest(unittest.TestCase):
 
     def test_login(self):
         '''
+        Tests the login route.
         '''
-
+        # register / login
         body = {"email": "testUser@test.ca", "password": "pass"}
         register_res = register_user(self.client, body)
         self.assertEqual(register_res.status_code, 201)
-
         login_res = login_user(self.client, body)
         data = json.loads(login_res.data.decode())
         self.assertEqual(login_res.status_code, 200)
@@ -77,6 +79,7 @@ class FlaskJwtAuthTest(unittest.TestCase):
                                      environ.get("REFRESH_TOKEN_SECRET"))
         self.assertTrue(user_id_at == user_id_rt == user_id)
 
+        # test invalid requests
         body = {"email": "NoUser@test.ca", "password": "pass"}
         login_res = login_user(self.client, body)
         self.assertEqual(login_res.status_code, 401)
@@ -99,35 +102,38 @@ class FlaskJwtAuthTest(unittest.TestCase):
 
     def test_get(self):
         '''
+        Tests the 'test' route.
         '''
+        # register / login
         body = {"email": "testUser@test.ca", "password": "pass"}
         register_res = register_user(self.client, body)
         self.assertEqual(register_res.status_code, 201)
-
         login_res = login_user(self.client, body)
         data = json.loads(login_res.data.decode())
         self.assertEqual(login_res.status_code, 200)
 
+        # get tokens
         data = json.loads(login_res.data.decode())
         access_token = data["data"]["access_token"]
 
+        # send get request to '/test'
         headers = {"Authorization": "Bearer " + str(access_token)}
         res = self.client().get('/test', headers=headers)
         self.assertEqual(res.status_code, 200)
 
+        # expire token and try again
         time.sleep(6)
         res = self.client().get('/test', headers=headers)
         self.assertEqual(res.status_code, 401)
 
     def test_refresh(self):
         '''
+        Tests the refresh route.
         '''
-        # register
+        # register / login
         body = {"email": "testUser@test.ca", "password": "pass"}
         register_res = register_user(self.client, body)
         self.assertEqual(register_res.status_code, 201)
-
-        # login
         login_res = login_user(self.client, body)
         data = json.loads(login_res.data.decode())
         self.assertEqual(login_res.status_code, 200)
@@ -158,6 +164,9 @@ class FlaskJwtAuthTest(unittest.TestCase):
 
 
 def register_user(client, body):
+    '''
+    Resisters a user.
+    '''
     return client().post(
         '/register',
         data=json.dumps(body),
@@ -166,6 +175,9 @@ def register_user(client, body):
 
 
 def login_user(client, body):
+    '''
+    Logs in a user.
+    '''
     return client().post(
         '/login',
         data=json.dumps(body),

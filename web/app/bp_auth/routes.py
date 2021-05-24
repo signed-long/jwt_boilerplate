@@ -94,7 +94,7 @@ def login():
 @refresh_token_required
 def logout(current_user):
     '''
-
+    Deletes a saved refresh token associated with a user.
     '''
     current_user.refresh_token = None
     db.session.commit()
@@ -107,7 +107,7 @@ def logout(current_user):
 @refresh_token_required
 def refresh(current_user):
     '''
-
+    Returns a fresh access token given a valid refresh token.
     '''
     exp = int(environ.get("ACCESS_TOKEN_EXP_SEC"))
     access_token = create_jwt_for_user(current_user,

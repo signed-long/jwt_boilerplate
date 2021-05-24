@@ -14,8 +14,10 @@ def creds_required(f):
     def decorated_function(*args, **kwargs):
         request_data = request.get_json()
 
-        # enforce
-        if request_data and request_data.get("email") and request_data.get("password"):
+        valid_request = request_data and request_data.get("email")
+        valid_request = valid_request and request_data.get("password")
+
+        if valid_request:
             return f(*args, **kwargs)
         else:
             msg = ("ERROR 400: Must include 'email' and 'password' ",
