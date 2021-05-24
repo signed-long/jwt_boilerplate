@@ -162,6 +162,40 @@ class FlaskJwtAuthTest(unittest.TestCase):
         res = self.client().get('/test', headers=headers)
         self.assertEqual(res.status_code, 200)
 
+    def test_logout(self):
+        '''
+        Tests the logout route.
+        '''
+        # register / login
+        body = {"email": "testUser@test.ca", "password": "pass"}
+        register_res = register_user(self.client, body)
+        self.assertEqual(register_res.status_code, 201)
+        login_res = login_user(self.client, body)
+        data = json.loads(login_res.data.decode())
+        self.assertEqual(login_res.status_code, 200)
+
+        # get tokens
+        data = json.loads(login_res.data.decode())
+        refresh_token = data["data"]["refresh_token"]
+
+        # logout
+        body = {"refresh_token": refresh_token}
+        res = self.client().post(
+            '/logout',
+            data=json.dumps(body),
+            content_type='application/json',
+        )
+        self.assertEqual(res.status_code, 200)
+
+        # assert we can't use old refresh token anymore
+        body = {"refresh_token": refresh_token}
+        res = self.client().get(
+            '/refresh',
+            data=json.dumps(body),
+            content_type='application/json'
+        )
+        self.assertEqual(res.status_code, 401)
+
 
 def register_user(client, body):
     '''
