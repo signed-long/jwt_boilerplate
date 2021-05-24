@@ -24,7 +24,9 @@ def create_app():
     # mail.init_app(app)
 
     from app.bp_auth.routes import bp_auth
+    from app.bp_errors.handlers import bp_errors
 
     app.register_blueprint(bp_auth)
+    app.register_blueprint(bp_errors)
 
     return app
