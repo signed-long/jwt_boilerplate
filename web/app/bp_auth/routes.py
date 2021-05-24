@@ -50,8 +50,8 @@ def register():
     db.session.add(new_user)
     db.session.commit()
 
-    msg = "OK 200: Registration successful"
-    return make_json_response(status=200, msg=msg)
+    msg = "OK 201: Registration successful"
+    return make_json_response(status=201, msg=msg)
 
 
 @bp_auth.route("/login", methods=["POST"])
@@ -76,8 +76,12 @@ def login():
         refresh_token = create_jwt_for_user(user,
                                             environ.get("REFRESH_TOKEN_SECRET"),
                                             days=exp)
-        tokens = {"access_token": access_token, "refresh_token": refresh_token}
 
+        # save user's refresh token
+        user.refresh_token = refresh_token
+        db.session.commit()
+
+        tokens = {"access_token": access_token, "refresh_token": refresh_token}
         msg = "OK 200: Authentication successful"
         return make_json_response(status=200, msg=msg, response_dict=tokens)
 
@@ -87,17 +91,29 @@ def login():
 
 
 @bp_auth.route("/logout", methods=["POST"])
-def logout():
+@refresh_token_required
+def logout(current_user):
     '''
 
     '''
-    pass
+    current_user.refresh_token = None
+    db.session.commit()
+
+    msg = "OK 200: Refresh token deleted."
+    return make_json_response(status=200, msg=msg)
 
 
-@bp_auth.route("/refresh", methods=["POST"])
+@bp_auth.route("/refresh", methods=["GET"])
 @refresh_token_required
 def refresh(current_user):
     '''
 
     '''
-    pass
+    exp = int(environ.get("ACCESS_TOKEN_EXP_SEC"))
+    access_token = create_jwt_for_user(current_user,
+                                       environ.get("ACCESS_TOKEN_SECRET"),
+                                       sec=exp)
+
+    tokens = {"access_token": access_token}
+    msg = "OK 200: Access token refreshed succesfully."
+    return make_json_response(status=200, msg=msg, response_dict=tokens)

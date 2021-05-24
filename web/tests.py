@@ -34,7 +34,7 @@ class FlaskJwtAuthTest(unittest.TestCase):
         '''
         body = {"email": "testUser@test.ca", "password": "pass"}
         res = register_user(self.client, body)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
 
         body = {"email": "testUser@test.ca"}
         res = register_user(self.client, body)
@@ -58,7 +58,7 @@ class FlaskJwtAuthTest(unittest.TestCase):
 
         body = {"email": "testUser@test.ca", "password": "pass"}
         register_res = register_user(self.client, body)
-        self.assertEqual(register_res.status_code, 200)
+        self.assertEqual(register_res.status_code, 201)
 
         login_res = login_user(self.client, body)
         data = json.loads(login_res.data.decode())
@@ -102,7 +102,7 @@ class FlaskJwtAuthTest(unittest.TestCase):
         '''
         body = {"email": "testUser@test.ca", "password": "pass"}
         register_res = register_user(self.client, body)
-        self.assertEqual(register_res.status_code, 200)
+        self.assertEqual(register_res.status_code, 201)
 
         login_res = login_user(self.client, body)
         data = json.loads(login_res.data.decode())

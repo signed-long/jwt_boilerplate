@@ -85,13 +85,14 @@ def refresh_token_required(f):
             try:
                 user_id = get_id_from_jwt(refresh_token,
                                           environ.get("REFRESH_TOKEN_SECRET"))
+
                 current_user = User.query.filter_by(id=user_id).first()
 
                 if current_user.refresh_token:
-                    kwargs["current_user": current_user]
+                    kwargs["current_user"] = current_user
                     return f(*args, **kwargs)
 
-                raise Exception
+                raise Exception("No refresh token assoctated with this user")
 
             # enforce refresh_token was valid, expired or malfourmend tokens
             # will cause exceptions to be trhown from get_id_from_jwt

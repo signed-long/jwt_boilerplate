@@ -1,6 +1,5 @@
 from flask import make_response, jsonify
 import jwt
-from os import environ
 from datetime import datetime, timedelta, timezone
 
 
@@ -30,7 +29,7 @@ def make_json_response(status, msg, response_dict={}):
 
 def create_jwt_for_user(user, key, sec=None, days=None):
     '''
-    Creates a access token.
+    Creates an access token.
 
     Parameter: user (User) - A user to create the token for.
     '''
@@ -39,7 +38,7 @@ def create_jwt_for_user(user, key, sec=None, days=None):
                    "exp": datetime.now(timezone.utc) + timedelta(seconds=sec)}
     elif days:
         payload = {"sub": user.id,
-                   "exp": datetime.now(timezone.utc) + timedelta(seconds=sec)}
+                   "exp": datetime.now(timezone.utc) + timedelta(days=days)}
     else:
         msg = "Expiration time must be passed as 'sec' or 'days' argument"
         raise Exception(msg)
