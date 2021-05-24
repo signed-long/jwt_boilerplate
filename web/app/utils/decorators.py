@@ -78,11 +78,11 @@ def refresh_token_required(f):
 
         # get refresh_token from request body
         request_data = request.get_json()
-        refresh_token = request_data.get("refresh_token")
 
         # enforce refresh_token was sent from client
-        if refresh_token:
+        if request_data and request_data.get("refresh_token"):
             try:
+                refresh_token = request_data.get("refresh_token")
                 user_id = get_id_from_jwt(refresh_token,
                                           environ.get("REFRESH_TOKEN_SECRET"))
 
