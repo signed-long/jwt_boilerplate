@@ -12,6 +12,6 @@ before_install:
     - tar zxvf trivy_${VERSION}_Linux-64bit.tar.gz
 
 script:
-    - ./trivy --exit-code 0 --severity HIGH --no-progress jwt_boilerplate_web
-    - ./trivy --exit-code 1 --severity CRITICAL --no-progress jwt_boilerplate_web
+    - ./trivy --exit-code 1 --severity HIGH --ignore-unfixed --no-progress jwt_boilerplate_web
+    - ./trivy --exit-code 1 --severity CRITICAL --ignore-unfixed --no-progress jwt_boilerplate_web
     - docker-compose -f docker-compose-tests.yml up --exit-code-from web
