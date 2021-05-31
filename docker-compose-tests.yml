@@ -4,7 +4,7 @@ version: '3.8'
 services:
   web:
     build: ./web
-    command: python tests.py
+    command: pipenv run python tests.py
     env_file:
       - ./.env.test
   db:
