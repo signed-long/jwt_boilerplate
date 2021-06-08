@@ -1,5 +1,5 @@
 import unittest
-from app import create_app, db
+from app import create_app, db, revoked_tokens_cache
 import json
 from app.models import User
 from app.utils.helpers import get_id_from_jwt
@@ -25,6 +25,7 @@ class FlaskJwtAuthTest(unittest.TestCase):
         Runs after every method.
         '''
         with self.app.app_context():
+            revoked_tokens_cache.flushall()
             db.session.remove()
             db.drop_all()
 

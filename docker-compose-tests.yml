@@ -9,6 +9,7 @@ services:
       - FLASK_APP=app/__init__.py
       - FLASK_ENV=testing
       - DATABASE_URL=postgresql://test_db:test_db@db:5432/test_db
+      - REDIS_URL=redis://redis:6379
       - SQL_HOST=db
       - SQL_PORT=5432
       - DATABASE=postgres
@@ -24,3 +25,6 @@ services:
       - POSTGRES_PASSWORD=test_db
       - POSTGRES_DB=test_db
     container_name: db
+  redis:
+    image: "redis:alpine"
+    container_name: redis

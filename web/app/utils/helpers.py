@@ -1,6 +1,7 @@
 from flask import make_response, jsonify
 import jwt
 from datetime import datetime, timedelta, timezone
+from app import revoked_tokens_cache
 
 
 def make_json_response(status, msg, response_dict={}):
@@ -27,17 +28,17 @@ def make_json_response(status, msg, response_dict={}):
     return make_response(jsonify(response), status_code)
 
 
-def create_jwt_for_user(user, key, sec=None, days=None):
+def create_jwt_for_user(user_id, key, sec=None, days=None):
     '''
     Creates an access token.
 
     Parameter: user (User) - A user to create the token for.
     '''
     if sec:
-        payload = {"sub": user.id,
+        payload = {"sub": user_id,
                    "exp": datetime.now(timezone.utc) + timedelta(seconds=sec)}
     elif days:
-        payload = {"sub": user.id,
+        payload = {"sub": user_id,
                    "exp": datetime.now(timezone.utc) + timedelta(days=days)}
     else:
         msg = "Expiration time must be passed as 'sec' or 'days' argument"
@@ -57,3 +58,9 @@ def get_id_from_jwt(token, key):
 
     payload = jwt.decode(token, key, algorithms="HS256")
     return payload["sub"]
+
+
+def revoke_token(token, key):
+    token_payload = jwt.decode(token, key, algorithms="HS256")
+    ttl = token_payload["exp"] - int(datetime.now(timezone.utc).timestamp())
+    revoked_tokens_cache.set(token[112:], "revoked", ex=ttl)

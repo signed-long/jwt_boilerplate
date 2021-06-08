@@ -9,6 +9,7 @@ class Config(object):
     CSRF_ENABLED = True
     SECRET_KEY = environ.get("SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL")
+    REDIS_URL = environ.get("REDIS_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
