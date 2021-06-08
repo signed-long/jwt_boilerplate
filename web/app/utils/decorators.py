@@ -47,6 +47,10 @@ def access_token_required(f):
                 user_id = get_id_from_jwt(access_token,
                                           environ.get("ACCESS_TOKEN_SECRET"))
 
+                if revoked_tokens_cache.get(access_token[112:]) == b'revoked':
+                    msg = "ERROR 401: Invalid refresh token."
+                    return make_json_response(status=401, msg=msg)
+
                 kwargs["user_id"] = user_id
                 return f(*args, **kwargs)
 
