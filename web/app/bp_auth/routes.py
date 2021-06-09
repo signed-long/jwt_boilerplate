@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from os import environ
-from app import bcrypt, db, revoked_tokens_cache
+from app import bcrypt, db
 from app.models import User
 from app.utils.helpers import (
     make_json_response,
@@ -46,9 +46,9 @@ def register():
     request_data = request.get_json()
     email = request_data["email"]
     pw_hash = bcrypt.generate_password_hash(request_data["password"])
+    user = User(email=email, password_hash=pw_hash.decode("utf-8"))
 
-    new_user = User(email=email, password_hash=pw_hash.decode("utf-8"))
-    db.session.add(new_user)
+    db.session.add(user)
     db.session.commit()
 
     msg = "OK 201: Registration successful"

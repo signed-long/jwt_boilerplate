@@ -61,6 +61,13 @@ def get_id_from_jwt(token, key):
 
 
 def revoke_token(token, key):
+    '''
+    Adds a token to the revoked token redis cache
+
+    Parameters:
+        - token (str) - The JWT token.
+        - key (str) - The key used to create the token.
+    '''
     token_payload = jwt.decode(token, key, algorithms="HS256")
     ttl = token_payload["exp"] - int(datetime.now(timezone.utc).timestamp())
     revoked_tokens_cache.set(token[112:], "revoked", ex=ttl)

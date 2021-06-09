@@ -23,6 +23,7 @@ Werkzeug = "==1.0.1"
 PyJWT = "==2.1.0"
 Flask-Bcrypt = "==0.7.1"
 flask-redis = "*"
+pyotp = "*"
 
 [dev-packages]
 

@@ -24,8 +24,10 @@ def create_app():
 
     from app.bp_auth.routes import bp_auth
     from app.bp_errors.handlers import bp_errors
+    from app.bp_mfa.routes import bp_mfa
 
     app.register_blueprint(bp_auth)
     app.register_blueprint(bp_errors)
+    app.register_blueprint(bp_mfa)
 
     return app
