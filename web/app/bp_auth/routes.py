@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from os import environ
-from app import bcrypt, db
+from app import db
 from app.models import User
 from app.utils.helpers import (
     make_json_response,
@@ -45,8 +45,8 @@ def register():
     '''
     request_data = request.get_json()
     email = request_data["email"]
-    pw_hash = bcrypt.generate_password_hash(request_data["password"])
-    user = User(email=email, password_hash=pw_hash.decode("utf-8"))
+    user = User(email=email)
+    user.set_pw_hash(request_data["password"])
 
     db.session.add(user)
     db.session.commit()
@@ -66,8 +66,15 @@ def login():
     user = User.query.filter_by(email=request_data["email"]).first()
 
     # authenticate user and return access token
-    if user and bcrypt.check_password_hash(user.password_hash,
-                                           request_data["password"]):
+    if user and user.check_pw_hash(request_data["password"]):
+
+        request_data = request.get_json()
+        valid_request = request_data and request_data.get("totp")
+
+        if user.otp_secret and valid_request:
+            if not user.verify_totp(request_data.get("totp")):
+                msg = "ERROR 401: Authentication failed."
+                return make_json_response(status=401, msg=msg)
 
         exp = int(environ.get("ACCESS_TOKEN_EXP_SEC"))
         access_token = create_jwt_for_user(user.id,
