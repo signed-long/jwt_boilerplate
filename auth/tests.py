@@ -197,6 +197,34 @@ class FlaskJwtAuthTest(unittest.TestCase):
         )
         self.assertEqual(res.status_code, 401)
 
+    def test_2fa_setup(self):
+        '''
+        Tests the 2fa with totp.
+        '''
+        # register / login
+        body = {"email": "testUser@test.ca", "password": "pass"}
+        register_res = register_user(self.client, body)
+        self.assertEqual(register_res.status_code, 201)
+        login_res = login_user(self.client, body)
+        data = json.loads(login_res.data.decode())
+        self.assertEqual(login_res.status_code, 200)
+
+        # get tokens
+        data = json.loads(login_res.data.decode())
+        access_token = data["data"]["access_token"]
+
+        headers = {"Authorization": "Bearer " + str(access_token)}
+        res = self.client().get(
+            '/setup_mfa',
+            headers=headers
+        )
+        data = json.loads(res.data.decode())
+        self.assertEqual(res.status_code, 200)
+
+        data = json.loads(res.data.decode())
+        uri = data["data"]["otp_uri"]
+        self.assertTrue(uri is not None)
+
 
 def register_user(client, body):
     '''

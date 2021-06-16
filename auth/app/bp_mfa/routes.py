@@ -20,6 +20,6 @@ def setup_otp(user_id):
     user.set_otp_secret()
     db.session.commit()
 
-    response = {"totp_uri": user.get_totp_uri()}
+    response = {"otp_uri": user.get_totp_uri()}
     msg = "OK 200: OTP URI Provided."
     return make_json_response(status=200, msg=msg, response_dict=response)

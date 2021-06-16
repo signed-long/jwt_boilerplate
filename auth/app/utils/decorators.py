@@ -54,7 +54,7 @@ def access_token_required(f):
                 kwargs["user_id"] = user_id
                 return f(*args, **kwargs)
 
-            # enforce access_token was valid, expired or malfourmend tokens
+            # enforce access_token was valid, expired or malformend tokens
             # will cause exceptions to be trhown from get_id_from_jwt
             except Exception:
                 msg = ("ERROR 401: Invalid access token. Ensure token is in the"
